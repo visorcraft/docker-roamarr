@@ -5,3 +5,8 @@ Thumbs.db
 
 # Local build output
 *-image.tar
+
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+/docs/superpowers/
