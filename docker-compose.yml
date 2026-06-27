@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: 2026 VisorCraft LLC
+# SPDX-License-Identifier: GPL-3.0-only
+#
+# Roamarr container image — example docker-compose.
+#
+# 1. Generate a secret:  openssl rand -base64 32
+# 2. Paste it into ROAMARR_SECRET below (or use a .env file / Docker secret).
+# 3. docker compose up -d
+#
+# The database and receipt attachments persist in the "roamarr-data" volume.
+# Back up that volume before upgrading.
+
+services:
+  roamarr:
+    build: .
+    image: roamarr:latest
+    container_name: roamarr
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # REQUIRED. Base64 32-byte key. Generate with: openssl rand -base64 32
+      ROAMARR_SECRET: "replace-with-output-from-openssl"
+      # Public URL when behind a reverse proxy (recommended in production):
+      # ORIGIN: "https://roamarr.example.com"
+    volumes:
+      - roamarr-data:/data
+
+volumes:
+  roamarr-data:

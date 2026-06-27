@@ -1,0 +1,9 @@
+# Build artifacts never relevant to the image build
+.git
+.gitignore
+.editorconfig
+.github
+README.md
+LICENSE
+docker-compose.yml
+*.md

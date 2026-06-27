@@ -1,0 +1,7 @@
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+
+# Local build output
+*-image.tar
