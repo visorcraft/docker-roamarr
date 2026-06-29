@@ -7,11 +7,16 @@ This repository builds a ready-to-run container image for
 [**Roamarr**](https://github.com/visorcraft/roamarr), the self-hosted
 TripIt-style travel organizer.
 
-The `Dockerfile` is a multi-stage build that clones Roamarr from GitHub
-(latest `master` by default), compiles the SvelteKit production bundle, and
-ships it on a slim Node.js runtime with only production dependencies. The
-SQLite database and receipt attachments live on a single mounted volume so a
-container can be recreated or upgraded without data loss.
+The `Dockerfile` is a multi-stage build that clones Roamarr and its persistence
+layer — MongrelDB and MongrelDB Kit — from GitHub (latest `master` by default),
+builds the native storage addon and the Kit, compiles the SvelteKit production
+bundle, and ships it on a slim Node.js runtime with only production
+dependencies. The MongrelDB database directory and receipt attachments live on a
+single mounted volume so a container can be recreated or upgraded without data
+loss.
+
+> The native addon is built `--release`. A debug build is several times slower;
+> the Dockerfile never uses `build:debug`.
 
 ## Quick start
 
@@ -51,7 +56,7 @@ through the in-app Settings area afterwards.
 | Variable | Required | Default | Notes |
 | -------- | -------- | ------- | ----- |
 | `ROAMARR_SECRET` | **yes** | none | Base64 32-byte key used for at-rest encryption. The app refuses to boot without it. Generate with `openssl rand -base64 32`. |
-| `DATABASE_PATH` | no | `/data/roamarr.db` | SQLite database path. Receipt attachments are stored beside it under `/data/attachments/`. |
+| `MONGREL_DATABASE_PATH` | no | `/data/roamarr.kitdb` | MongrelDB Kit data directory. Receipt attachments are stored beside it under `/data/attachments/`. |
 | `PORT` | no | `3000` | Port the adapter-node server listens on. |
 | `ORIGIN` | no | none | Public origin (e.g. `https://roamarr.example.com`) for correct cookies/redirects behind a reverse proxy. |
 
@@ -59,7 +64,7 @@ through the in-app Settings area afterwards.
 
 | Container path | Purpose |
 | -------------- | ------- |
-| `/data` | SQLite database + receipt attachments. **Mount this as a named volume or host bind to persist data across upgrades.** |
+| `/data` | MongrelDB database directory + receipt attachments. **Mount this as a named volume or host bind to persist data across upgrades.** |
 
 ### Ports
 
@@ -101,9 +106,13 @@ starts. **Always back up the `/data` volume before upgrading.**
 
 ## Architecture
 
-This image is built on Debian Bookworm (`node:22-bookworm-slim` runtime) and is
-tested on `linux/amd64` and `linux/arm64`. `better-sqlite3` native modules are
-compiled in the build stage and copied into the runtime stage.
+This image is built on Debian Bookworm (`node:22-bookworm-slim` runtime). The
+build stage installs a Rust toolchain and compiles the native MongrelDB storage
+addon (`mongreldb`, a NAPI `.node`) in `--release` mode alongside MongrelDB Kit;
+the built artifacts are staged into the slim runtime. Roamarr, MongrelDB, and
+MongrelDB Kit are cloned in a sibling layout (selectable per repo via the
+`ROAMARR_REF`, `MONGRELDB_REF`, and `MONGRELDB_KIT_REF` build args) so Roamarr's
+local `file:` dependencies resolve.
 
 ## Support
 
