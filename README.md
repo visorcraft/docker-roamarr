@@ -56,7 +56,7 @@ through the in-app Settings area afterwards.
 | Variable | Required | Default | Notes |
 | -------- | -------- | ------- | ----- |
 | `ROAMARR_SECRET` | **yes** | none | Base64 32-byte key used for at-rest encryption. The app refuses to boot without it. Generate with `openssl rand -base64 32`. |
-| `MONGREL_DATABASE_PATH` | no | `/data/roamarr.kitdb` | MongrelDB Kit data directory. Receipt attachments are stored beside it under `/data/attachments/`. |
+| `MONGREL_DATABASE_PATH` | no | `/data/roamarr-db` | MongrelDB Kit data directory. Receipt attachments are stored beside it under `/data/attachments/`. |
 | `PORT` | no | `3000` | Port the adapter-node server listens on. |
 | `ORIGIN` | no | none | Public origin (e.g. `https://roamarr.example.com`) for correct cookies/redirects behind a reverse proxy. |
 
