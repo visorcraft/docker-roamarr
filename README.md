@@ -82,7 +82,7 @@ The `ROAMARR_REF` build arg selects the git ref (branch, tag, or commit) of
 podman build -t roamarr .
 
 # Pinned release tag
-podman build --build-arg ROAMARR_REF=v0.3.7 -t roamarr:0.3.7 .
+podman build --build-arg ROAMARR_REF=v0.10.1 -t roamarr:0.10.1 .
 ```
 
 `NODE_VERSION` (default `22`) selects the Node.js major for both build and
