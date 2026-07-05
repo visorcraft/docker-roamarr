@@ -58,7 +58,7 @@ LABEL org.opencontainers.image.title="Roamarr" \
 
 ENV NODE_ENV=production \
     PORT=3000 \
-    MONGREL_DATABASE_PATH=/data/roamarr-db
+    DATABASE_PATH=/data/roamarr-db
 
 WORKDIR /src/roamarr
 COPY --from=build /src/roamarr/build /src/roamarr/build
