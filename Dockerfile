@@ -21,7 +21,7 @@
 #   docker build  -t roamarr .
 #
 # Pin a release:
-#   podman build --build-arg ROAMARR_REF=v0.10.1 -t roamarr:0.10.1 .
+#   podman build --build-arg ROAMARR_REF=v0.20.0 -t roamarr:0.20.0 .
 #
 # Run:
 #   podman run -d --name roamarr -p 3000:3000 \
