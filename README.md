@@ -78,11 +78,11 @@ The `ROAMARR_REF` build arg selects the git ref (branch, tag, or commit) of
 `visorcraft/roamarr` to build:
 
 ```bash
-# Latest master (default)
+# Default build (Roamarr v0.26.1, the release this image tracks)
 podman build -t roamarr .
 
-# Pinned release tag
-podman build --build-arg ROAMARR_REF=v0.20.0 -t roamarr:0.20.0 .
+# Override with a different ref (branch, tag, or commit)
+podman build --build-arg ROAMARR_REF=master -t roamarr:edge .
 ```
 
 `NODE_VERSION` (default `24`) selects the Node.js major for both build and
