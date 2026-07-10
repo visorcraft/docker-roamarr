@@ -85,7 +85,7 @@ podman build -t roamarr .
 podman build --build-arg ROAMARR_REF=v0.20.0 -t roamarr:0.20.0 .
 ```
 
-`NODE_VERSION` (default `22`) selects the Node.js major for both build and
+`NODE_VERSION` (default `24`) selects the Node.js major for both build and
 runtime stages. Roamarr requires Node.js >= 22.12.
 
 ## Upgrading
@@ -106,7 +106,7 @@ starts. **Always back up the `/data` volume before upgrading.**
 
 ## Architecture
 
-This image is built on Debian Bookworm (`node:22-bookworm-slim` runtime). The
+This image is built on Debian Bookworm (`node:24-bookworm-slim` runtime). The
 build stage installs a Rust toolchain and compiles the native MongrelDB storage
 addon (`mongreldb`, a NAPI `.node`) in `--release` mode alongside MongrelDB Kit;
 the built artifacts are staged into the slim runtime. Roamarr, MongrelDB, and
