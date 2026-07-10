@@ -78,7 +78,7 @@ The `ROAMARR_REF` build arg selects the git ref (branch, tag, or commit) of
 `visorcraft/roamarr` to build:
 
 ```bash
-# Default build (Roamarr v0.26.1, the release this image tracks)
+# Default build (Roamarr v0.26.2, the release this image tracks)
 podman build -t roamarr .
 
 # Override with a different ref (branch, tag, or commit)

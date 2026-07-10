@@ -12,7 +12,7 @@
 #
 # Build args:
 #   ROAMARR_REF   git ref (branch, tag, or commit) of visorcraft/roamarr.
-#                 Default "v0.26.1" (the Roamarr release this image tracks).
+#                 Default "v0.26.2" (the Roamarr release this image tracks).
 #   NODE_VERSION  Node.js major to build and run on. Default 24 (Roamarr requires
 #                 Node.js >= 22.12).
 #
@@ -32,7 +32,7 @@
 # See README.md for docker-compose and full configuration.
 
 ARG NODE_VERSION=24
-ARG ROAMARR_REF=v0.26.1
+ARG ROAMARR_REF=v0.26.2
 
 # ---- build stage: fetch Roamarr and build the production bundle ------------
 FROM node:${NODE_VERSION}-bookworm AS build
@@ -48,7 +48,7 @@ RUN git clone --depth 1 --branch "${ROAMARR_REF}" https://github.com/visorcraft/
 WORKDIR /src/roamarr
 RUN npm ci --no-audit --no-fund \
     && npm run build \
-    && npm prune --omit=dev --no-audit --no-fund || true
+    && (npm prune --omit=dev --no-audit --no-fund || true)
 
 # ---- runtime stage: slim image with the built app ---------------------------
 FROM node:${NODE_VERSION}-bookworm-slim AS runtime
