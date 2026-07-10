@@ -22,7 +22,8 @@ loss.
 
 ```bash
 # 1. Build the image from this repo
-podman build -t roamarr .
+make build
+# or: podman build --format docker -t roamarr .
 # or: docker build -t roamarr .
 
 # 2. Create a persistent volume and run
@@ -34,6 +35,10 @@ podman run -d --name roamarr \
   --restart unless-stopped \
   roamarr
 ```
+
+> With podman, build with `--format docker` (or `make build`) so the image's
+> `HEALTHCHECK` is honored — podman's default OCI image format silently drops it.
+> `docker build` always honors `HEALTHCHECK` and needs no flag.
 
 Open `http://localhost:3000/setup` on first boot to create the admin account.
 
@@ -79,10 +84,12 @@ The `ROAMARR_REF` build arg selects the git ref (branch, tag, or commit) of
 
 ```bash
 # Default build (Roamarr v0.26.2, the release this image tracks)
-podman build -t roamarr .
+make build
+# or: podman build --format docker -t roamarr .
 
 # Override with a different ref (branch, tag, or commit)
-podman build --build-arg ROAMARR_REF=master -t roamarr:edge .
+make build TAG=edge REF=master
+# or: podman build --format docker --build-arg ROAMARR_REF=master -t roamarr:edge .
 ```
 
 `NODE_VERSION` (default `24`) selects the Node.js major for both build and

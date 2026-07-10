@@ -16,12 +16,15 @@
 #   NODE_VERSION  Node.js major to build and run on. Default 24 (Roamarr requires
 #                 Node.js >= 22.12).
 #
-# Build:
-#   podman build -t roamarr .
-#   docker build  -t roamarr .
+# Build (use the docker image format so the HEALTHCHECK is honored; podman's
+# default OCI format drops it):
+#   make build                              # or:
+#   podman build --format docker -t roamarr .
+#   docker build -t roamarr .
 #
 # Build a different ref:
-#   podman build --build-arg ROAMARR_REF=master -t roamarr:edge .
+#   make build TAG=edge REF=master          # or:
+#   podman build --format docker --build-arg ROAMARR_REF=master -t roamarr:edge .
 #
 # Run:
 #   podman run -d --name roamarr -p 3000:3000 \
