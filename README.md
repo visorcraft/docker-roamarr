@@ -7,16 +7,14 @@ This repository builds a ready-to-run container image for
 [**Roamarr**](https://github.com/visorcraft/roamarr), the self-hosted
 TripIt-style travel organizer.
 
-The `Dockerfile` is a multi-stage build that clones Roamarr and its persistence
-layer — MongrelDB and MongrelDB Kit — from GitHub (latest `master` by default),
-builds the native storage addon and the Kit, compiles the SvelteKit production
-bundle, and ships it on a slim Node.js runtime with only production
-dependencies. The MongrelDB database directory and receipt attachments live on a
-single mounted volume so a container can be recreated or upgraded without data
+The `Dockerfile` is a two-stage build: it clones `visorcraft/roamarr` (the
+`ROAMARR_REF` build arg, pinned to a release tag by default), runs `npm ci` to
+fetch Roamarr's published dependencies — MongrelDB Kit and the prebuilt
+`mongreldb` NAPI storage addon — builds the SvelteKit (adapter-node)
+production bundle, then copies it onto a slim Node.js runtime with only
+production dependencies. The MongrelDB database and receipt attachments live on
+a single mounted volume so a container can be recreated or upgraded without data
 loss.
-
-> The native addon is built `--release`. A debug build is several times slower;
-> the Dockerfile never uses `build:debug`.
 
 ## Quick start
 
@@ -100,7 +98,7 @@ runtime stages. Roamarr requires Node.js >= 22.12.
 The database lives on the `/data` volume, so upgrades are safe:
 
 ```bash
-podman pull <your-registry>/roamarr:latest   # or: podman build -t roamarr .
+podman pull <your-registry>/roamarr:latest   # or: make build
 podman stop roamarr
 podman rm roamarr
 # Recreate with the SAME -v roamarr-data:/data as before
@@ -113,13 +111,14 @@ starts. **Always back up the `/data` volume before upgrading.**
 
 ## Architecture
 
-This image is built on Debian Bookworm (`node:24-bookworm-slim` runtime). The
-build stage installs a Rust toolchain and compiles the native MongrelDB storage
-addon (`mongreldb`, a NAPI `.node`) in `--release` mode alongside MongrelDB Kit;
-the built artifacts are staged into the slim runtime. Roamarr, MongrelDB, and
-MongrelDB Kit are cloned in a sibling layout (selectable per repo via the
-`ROAMARR_REF`, `MONGRELDB_REF`, and `MONGRELDB_KIT_REF` build args) so Roamarr's
-local `file:` dependencies resolve.
+Two-stage build on Debian Bookworm. The **build** stage (`node:24-bookworm`)
+clones `visorcraft/roamarr` at `ROAMARR_REF` and runs `npm ci && npm run build`
+(Vite/SvelteKit adapter-node); Roamarr pulls MongrelDB Kit and the prebuilt
+`mongreldb` NAPI addon from npm, so no Rust toolchain is needed in this image.
+The **runtime** stage (`node:24-bookworm-slim`) copies `build/`, the production
+`node_modules`, and the package files, and serves them with `node build`. State
+persists on the `/data` volume. The image carries a `HEALTHCHECK` (build with
+`--format docker` / `make build` so podman keeps it).
 
 ## Support
 
