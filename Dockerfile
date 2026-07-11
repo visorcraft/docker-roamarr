@@ -12,7 +12,7 @@
 #
 # Build args:
 #   ROAMARR_REF   git ref (branch, tag, or commit) of visorcraft/roamarr.
-#                 Default "v0.26.2" (the Roamarr release this image tracks).
+#                 Default "master" so the image tracks current Roamarr.
 #   NODE_VERSION  Node.js major to build and run on. Default 24 (Roamarr requires
 #                 Node.js >= 22.12).
 #
@@ -26,16 +26,16 @@
 #   make build TAG=edge REF=master          # or:
 #   podman build --format docker --build-arg ROAMARR_REF=master -t roamarr:edge .
 #
-# Run:
+# Run (secrets are generated once inside the persistent volume):
 #   podman run -d --name roamarr -p 3000:3000 \
 #     -v roamarr-data:/data \
-#     -e ROAMARR_SECRET="$(openssl rand -base64 32)" \
+#     -v roamarr-secrets:/run/roamarr-secrets \
 #     roamarr
 #
 # See README.md for docker-compose and full configuration.
 
 ARG NODE_VERSION=24
-ARG ROAMARR_REF=v0.26.2
+ARG ROAMARR_REF=master
 
 # ---- build stage: fetch Roamarr and build the production bundle ------------
 FROM node:${NODE_VERSION}-bookworm AS build
@@ -68,12 +68,13 @@ COPY --from=build /src/roamarr/build /src/roamarr/build
 COPY --from=build /src/roamarr/node_modules /src/roamarr/node_modules
 COPY --from=build /src/roamarr/package.json /src/roamarr/package.json
 COPY --from=build /src/roamarr/package-lock.json /src/roamarr/package-lock.json
+COPY docker-entrypoint.mjs /src/roamarr/docker-entrypoint.mjs
 
-RUN mkdir -p /data
-VOLUME /data
+RUN mkdir -p /data /run/roamarr-secrets
+VOLUME ["/data", "/run/roamarr-secrets"]
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD node -e "fetch('http://127.0.0.1:'+process.env.PORT+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
-CMD ["node", "build"]
+CMD ["node", "docker-entrypoint.mjs"]

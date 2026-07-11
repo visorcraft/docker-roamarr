@@ -3,9 +3,9 @@
 #
 # Roamarr container image — example docker-compose.
 #
-# 1. Generate a secret:  openssl rand -base64 32
-# 2. Paste it into ROAMARR_SECRET below (or use a .env file / Docker secret).
-# 3. docker compose up -d
+# 1. docker compose up -d
+# 2. Open /setup. Encryption and database credentials are generated once and
+#    stored in a separate persistent secret volume. Optional overrides remain.
 #
 # The database and receipt attachments persist in the "roamarr-data" volume.
 # Back up that volume before upgrading.
@@ -19,12 +19,16 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # REQUIRED. Base64 32-byte key. Generate with: openssl rand -base64 32
-      ROAMARR_SECRET: "replace-with-output-from-openssl"
+      # Optional overrides. Omit them for secure generated values persisted separately.
+      # ROAMARR_SECRET: "base64-encoded-32-byte-value"
+      # DATABASE_USER: "roamarr"
+      # DATABASE_PASS: "strong-database-password"
       # Public URL when behind a reverse proxy (recommended in production):
       # ORIGIN: "https://roamarr.example.com"
     volumes:
       - roamarr-data:/data
+      - roamarr-secrets:/run/roamarr-secrets
 
 volumes:
   roamarr-data:
+  roamarr-secrets:

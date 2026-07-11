@@ -26,10 +26,11 @@ make build
 
 # 2. Create a persistent volume and run
 podman volume create roamarr-data
+podman volume create roamarr-secrets
 podman run -d --name roamarr \
   -p 3000:3000 \
   -v roamarr-data:/data \
-  -e ROAMARR_SECRET="$(openssl rand -base64 32)" \
+  -v roamarr-secrets:/run/roamarr-secrets \
   --restart unless-stopped \
   roamarr
 ```
@@ -42,10 +43,10 @@ Open `http://localhost:3000/setup` on first boot to create the admin account.
 
 ## docker-compose
 
-A ready-to-use compose file is included as `docker-compose.yml`:
+A ready-to-use compose file is included as `docker-compose.yml`. No secret
+generation is required:
 
 ```bash
-openssl rand -base64 32   # use this output for ROAMARR_SECRET below
 docker compose up -d
 ```
 
@@ -58,7 +59,9 @@ through the in-app Settings area afterwards.
 
 | Variable | Required | Default | Notes |
 | -------- | -------- | ------- | ----- |
-| `ROAMARR_SECRET` | **yes** | none | Base64 32-byte key used for at-rest encryption. The app refuses to boot without it. Generate with `openssl rand -base64 32`. |
+| `ROAMARR_SECRET` | no | generated once | Base64 32-byte key used for at-rest encryption. Stored mode `0600` in the separate secret volume. |
+| `DATABASE_USER` | no | generated once | MongrelDB administrator username. Stored with the generated secret. |
+| `DATABASE_PASS` | no | generated once | MongrelDB administrator password. Stored with the generated secret. |
 | `DATABASE_PATH` | no | `/data/roamarr-db` | MongrelDB Kit data directory or file path. Receipt attachments are stored beside it under `/data/attachments/`. |
 | `PORT` | no | `3000` | Port the adapter-node server listens on. |
 | `ORIGIN` | no | none | Public origin (e.g. `https://roamarr.example.com`) for correct cookies/redirects behind a reverse proxy. |
@@ -68,6 +71,13 @@ through the in-app Settings area afterwards.
 | Container path | Purpose |
 | -------------- | ------- |
 | `/data` | MongrelDB database directory + receipt attachments. **Mount this as a named volume or host bind to persist data across upgrades.** |
+| `/run/roamarr-secrets` | Generated encryption key and database credentials. Mount and back up separately. |
+
+The container generates `ROAMARR_SECRET`, `DATABASE_USER`, and `DATABASE_PASS`
+on first boot when omitted. It stores them in `/run/roamarr-secrets/credentials.json`
+with mode `0600` and reuses them on every restart. Back up this volume separately.
+Explicit environment values override generated values and are persisted for
+later restarts. Never change these values after the database is created.
 
 ### Ports
 
@@ -81,7 +91,7 @@ The `ROAMARR_REF` build arg selects the git ref (branch, tag, or commit) of
 `visorcraft/roamarr` to build:
 
 ```bash
-# Default build (Roamarr v0.26.2, the release this image tracks)
+# Default build (current Roamarr master)
 make build
 # or: podman build --format docker -t roamarr .
 
@@ -101,9 +111,10 @@ The database lives on the `/data` volume, so upgrades are safe:
 podman pull <your-registry>/roamarr:latest   # or: make build
 podman stop roamarr
 podman rm roamarr
-# Recreate with the SAME -v roamarr-data:/data as before
+# Recreate with the SAME data and secret volumes as before
 podman run -d --name roamarr -p 3000:3000 -v roamarr-data:/data \
-  -e ROAMARR_SECRET='<same secret as before>' --restart unless-stopped roamarr
+  -v roamarr-secrets:/run/roamarr-secrets \
+  --restart unless-stopped roamarr
 ```
 
 Roamarr applies database migrations automatically on boot, before the scheduler
