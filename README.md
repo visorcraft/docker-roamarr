@@ -5,7 +5,7 @@
 
 This repository builds a ready-to-run container image for
 [**Roamarr**](https://github.com/visorcraft/roamarr), the self-hosted
-TripIt-style travel organizer.
+Trip Tracker-style travel organizer.
 
 The `Dockerfile` is a two-stage build: it clones `visorcraft/roamarr` (the
 `ROAMARR_REF` build arg, pinned to a release tag by default), runs `npm ci` to
