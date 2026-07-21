@@ -14,7 +14,7 @@
 #   ROAMARR_REF   git ref (branch, tag, or commit) of visorcraft/roamarr.
 #                 Default "master" so the image tracks current Roamarr.
 #   NODE_VERSION  Node.js major to build and run on. Default 24 (Roamarr requires
-#                 Node.js >= 22.12).
+#                 Node.js >= 24).
 #
 # Build (use the docker image format so the HEALTHCHECK is honored; podman's
 # default OCI format drops it):

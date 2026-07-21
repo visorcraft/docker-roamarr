@@ -101,7 +101,7 @@ make build TAG=edge REF=master
 ```
 
 `NODE_VERSION` (default `24`) selects the Node.js major for both build and
-runtime stages. Roamarr requires Node.js >= 22.12.
+runtime stages. Roamarr requires Node.js >= 24.
 
 ## Upgrading
 
