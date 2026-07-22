@@ -12,7 +12,7 @@
 #
 # Build args:
 #   ROAMARR_REF   git ref (branch, tag, or commit) of visorcraft/roamarr.
-#                 Default "master" so the image tracks current Roamarr.
+#                 Default "v0.36.1" (the Roamarr release this image tracks).
 #   NODE_VERSION  Node.js major to build and run on. Default 24 (Roamarr requires
 #                 Node.js >= 24).
 #
@@ -35,7 +35,7 @@
 # See README.md for docker-compose and full configuration.
 
 ARG NODE_VERSION=24
-ARG ROAMARR_REF=master
+ARG ROAMARR_REF=v0.36.1
 
 # ---- build stage: fetch Roamarr and build the production bundle ------------
 FROM node:${NODE_VERSION}-bookworm AS build
