@@ -91,7 +91,7 @@ The `ROAMARR_REF` build arg selects the git ref (branch, tag, or commit) of
 `visorcraft/roamarr` to build:
 
 ```bash
-# Default build (Roamarr v0.36.4, the release this image tracks)
+# Default build (Roamarr v0.37.0, the release this image tracks)
 make build
 # or: podman build --format docker -t roamarr .
 
