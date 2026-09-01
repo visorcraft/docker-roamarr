@@ -12,7 +12,7 @@
 #
 # Build args:
 #   ROAMARR_REF   git ref (branch, tag, or commit) of visorcraft/roamarr.
-#                 Default "v0.41.4" (the Roamarr release this image tracks).
+#                 Default "v0.41.5" (the Roamarr release this image tracks).
 #   NODE_VERSION  Node.js major to build and run on. Default 24 (Roamarr requires
 #                 Node.js >= 24).
 #
@@ -35,7 +35,7 @@
 # See README.md for docker-compose and full configuration.
 
 ARG NODE_VERSION=24
-ARG ROAMARR_REF=v0.41.4
+ARG ROAMARR_REF=v0.41.5
 
 # ---- build stage: fetch Roamarr and build the production bundle ------------
 FROM node:${NODE_VERSION}-bookworm AS build
@@ -61,7 +61,8 @@ LABEL org.opencontainers.image.title="Roamarr" \
 
 ENV NODE_ENV=production \
     PORT=3000 \
-    DATABASE_PATH=/data/roamarr-db
+    DATABASE_PATH=/data/roamarr-db \
+    BODY_SIZE_LIMIT=Infinity
 
 WORKDIR /src/roamarr
 COPY --from=build /src/roamarr/build /src/roamarr/build
