@@ -122,14 +122,15 @@ starts. **Always back up the `/data` volume before upgrading.**
 
 ## Architecture
 
-Two-stage build on Debian Bookworm. The **build** stage (`node:24-bookworm`)
-clones `visorcraft/roamarr` at `ROAMARR_REF` and runs `npm ci && npm run build`
-(Vite/SvelteKit adapter-node); Roamarr pulls MongrelDB Kit and the prebuilt
-`mongreldb` NAPI addon from npm, so no Rust toolchain is needed in this image.
-The **runtime** stage (`node:24-bookworm-slim`) copies `build/`, the production
-`node_modules`, and the package files, and serves them with `node build`. State
-persists on the `/data` volume. The image carries a `HEALTHCHECK` (build with
-`--format docker` / `make build` so podman keeps it).
+The image uses Ubuntu 26.04 and Node.js 24 from the official Node image.
+MongrelDB's published native addon requires glibc 2.43, which Debian Bookworm
+and Trixie do not provide. The **build** stage clones `visorcraft/roamarr` at
+`ROAMARR_REF` and runs `npm ci && npm run build` (Vite/SvelteKit adapter-node);
+Roamarr pulls MongrelDB Kit and the prebuilt `mongreldb` NAPI addon from npm,
+so no Rust toolchain is needed in this image. The **runtime** stage copies
+`build/`, the production `node_modules`, and the package files, and serves them
+with `node build`. State persists on the `/data` volume. The image carries a
+`HEALTHCHECK` (build with `--format docker` / `make build` so podman keeps it).
 
 ## Support
 

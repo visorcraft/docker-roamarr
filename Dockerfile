@@ -14,7 +14,10 @@
 #   ROAMARR_REF   git ref (branch, tag, or commit) of visorcraft/roamarr.
 #                 Default "v0.44.1" (the Roamarr release this image tracks).
 #   NODE_VERSION  Node.js major to build and run on. Default 24 (Roamarr requires
-#                 Node.js >= 24).
+#                 Node.js >= 24). The binary comes from the official Node image.
+#                 The OS is Ubuntu 26.04 because MongrelDB's published native
+#                 addon requires glibc 2.43. Debian Bookworm and Trixie do not
+#                 provide it.
 #
 # Build (use the docker image format so the HEALTHCHECK is honored; podman's
 # default OCI format drops it):
@@ -37,9 +40,13 @@
 ARG NODE_VERSION=24
 ARG ROAMARR_REF=v0.44.1
 
+FROM node:${NODE_VERSION}-trixie AS node
+
 # ---- build stage: fetch Roamarr and build the production bundle ------------
-FROM node:${NODE_VERSION}-bookworm AS build
+FROM ubuntu:26.04 AS build
 ARG ROAMARR_REF
+ARG DEBIAN_FRONTEND=noninteractive
+COPY --from=node /usr/local /usr/local
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git ca-certificates \
@@ -54,7 +61,9 @@ RUN npm ci --no-audit --no-fund \
     && (npm prune --omit=dev --no-audit --no-fund || true)
 
 # ---- runtime stage: slim image with the built app ---------------------------
-FROM node:${NODE_VERSION}-bookworm-slim AS runtime
+FROM ubuntu:26.04 AS runtime
+ARG DEBIAN_FRONTEND=noninteractive
+COPY --from=node /usr/local /usr/local
 LABEL org.opencontainers.image.title="Roamarr" \
       org.opencontainers.image.source="https://github.com/visorcraft/roamarr" \
       org.opencontainers.image.licenses="GPL-3.0-only"
@@ -63,6 +72,10 @@ ENV NODE_ENV=production \
     PORT=3000 \
     DATABASE_PATH=/data/roamarr-db \
     BODY_SIZE_LIMIT=Infinity
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src/roamarr
 COPY --from=build /src/roamarr/build /src/roamarr/build
