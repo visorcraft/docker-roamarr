@@ -62,9 +62,13 @@ through the in-app Settings area afterwards.
 | `ROAMARR_SECRET` | no | generated once | Base64 32-byte key used for at-rest encryption. Stored mode `0600` in the separate secret volume. |
 | `DATABASE_USER` | no | generated once | MongrelDB administrator username. Stored with the generated secret. |
 | `DATABASE_PASS` | no | generated once | MongrelDB administrator password. Stored with the generated secret. |
-| `DATABASE_PATH` | no | `/data/roamarr-db` | MongrelDB Kit data directory or file path. Receipt attachments are stored beside it under `/data/attachments/`. |
+| `DATABASE_PATH` | no | `/data/roamarr-db` | MongrelDB Kit data directory or file path. Uploaded attachments default to `/data/roamarr-db/attachments/`. |
+| `ATTACHMENTS_PATH` | no | `<DATABASE_PATH>/attachments` | Optional override directory for uploaded documents, gallery photos, posters, and receipts. |
+| `EMBEDDINGS_CACHE_PATH` | no | `/data/roamarr-models` | Optional cache directory for local MiniLM ONNX models used by admin-enabled semantic search. |
+| `BODY_SIZE_LIMIT` | no | `Infinity` | Maximum HTTP request body accepted by adapter-node (set to `Infinity` in the image for large uploads/restores; any reverse-proxy limit still applies). |
+| `ROAMARR_MAX_RESTORE_BYTES` | no | unlimited | Optional positive byte cap for uploaded backup restore archives (`0` or `unlimited` disables the app cap). |
 | `PORT` | no | `3000` | Port the adapter-node server listens on. |
-| `ORIGIN` | no | none | Public origin (e.g. `https://roamarr.example.com`) for correct cookies/redirects behind a reverse proxy. |
+| `ORIGIN` | no | none | Public origin (e.g. `https://roamarr.example.com`) for correct cookies, redirects, OIDC callbacks, and WebAuthn/passkeys behind a reverse proxy. |
 
 ### Volumes
 
@@ -128,8 +132,9 @@ and Trixie do not provide. The **build** stage clones `visorcraft/roamarr` at
 `ROAMARR_REF` and runs `npm ci && npm run build` (Vite/SvelteKit adapter-node);
 Roamarr pulls MongrelDB Kit and the prebuilt `mongreldb` NAPI addon from npm,
 so no Rust toolchain is needed in this image. The **runtime** stage copies
-`build/`, the production `node_modules`, and the package files, and serves them
-with `node build`. State persists on the `/data` volume. The image carries a
+`build/`, the production `node_modules`, and the package files, and starts the
+app through `node docker-entrypoint.mjs` (which initializes persistent secrets
+before launching `build/`). State persists on the `/data` volume. The image carries a
 `HEALTHCHECK` (build with `--format docker` / `make build` so podman keeps it).
 
 ## Support
